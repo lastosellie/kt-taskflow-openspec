@@ -2,14 +2,12 @@ import os
 import re
 from datetime import datetime, timedelta, timezone
 
+import bcrypt
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 
 JWT_SECRET = os.getenv("JWT_SECRET", "local-dev-secret-change-in-production")
 JWT_ALGORITHM = "HS256"
 JWT_EXPIRE_HOURS = 24
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 PASSWORD_RULES = re.compile(
     r'^(?=.*[A-Z])(?=.*[a-z])(?=.*[!@#$%^&*()\-_=+\[\]{};:\'",.<>/?\\|`~]).{8,}$'
@@ -17,11 +15,11 @@ PASSWORD_RULES = re.compile(
 
 
 def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+    return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
 
 def verify_password(plain: str, hashed: str) -> bool:
-    return pwd_context.verify(plain, hashed)
+    return bcrypt.checkpw(plain.encode(), hashed.encode())
 
 
 def validate_password(password: str) -> bool:
