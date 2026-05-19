@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TaskFlow — 로그인</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 min-h-screen flex items-center justify-center">
+  <div class="w-full max-w-sm">
+    <div class="text-center mb-8">
+      <div class="inline-flex items-center gap-2">
+        <div class="w-9 h-9 bg-cyan-600 rounded-lg flex items-center justify-center">
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2
+                 M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          </svg>
+        </div>
+        <span class="text-2xl font-bold text-slate-800">TaskFlow</span>
+      </div>
+      <p class="text-sm text-slate-500 mt-1">팀 업무를 한 화면에서</p>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+      <div class="flex border-b border-slate-200">
+        <button id="tab-login"
+          class="flex-1 py-3 text-sm font-semibold text-cyan-600 border-b-2 border-cyan-600">
+          로그인
+        </button>
+        <button id="tab-signup"
+          class="flex-1 py-3 text-sm font-semibold text-slate-400">
+          회원가입
+        </button>
+      </div>
+
+      <!-- 로그인 폼 -->
+      <form id="form-login" class="p-6 space-y-4" onsubmit="return false">
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">이메일</label>
+          <input id="login-email" type="email" placeholder="example@email.com" autocomplete="email"
+            class="w-full px-3 py-2.5 text-sm border border-slate-300 rounded-lg
+                   focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent" />
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">비밀번호</label>
+          <input id="login-password" type="password" placeholder="••••••••" autocomplete="current-password"
+            class="w-full px-3 py-2.5 text-sm border border-slate-300 rounded-lg
+                   focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent" />
+        </div>
+        <button type="submit" onclick="doLogin()"
+          class="w-full py-2.5 bg-cyan-600 hover:bg-cyan-700 text-white text-sm font-semibold
+                 rounded-lg transition-colors">
+          로그인
+        </button>
+        <p id="login-error" class="hidden text-xs text-red-500 text-center">
+          이메일 또는 비밀번호가 올바르지 않습니다.
+        </p>
+      </form>
+
+      <!-- 회원가입 폼 -->
+      <form id="form-signup" class="hidden p-6 space-y-4" onsubmit="return false">
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">이메일</label>
+          <input id="signup-email" type="email" placeholder="example@email.com" autocomplete="email"
+            class="w-full px-3 py-2.5 text-sm border border-slate-300 rounded-lg
+                   focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent" />
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">비밀번호</label>
+          <input id="signup-password" type="password"
+            placeholder="8자↑ 대문자·소문자·특수문자 포함" autocomplete="new-password"
+            oninput="checkPassword(this.value)"
+            class="w-full px-3 py-2.5 text-sm border border-slate-300 rounded-lg
+                   focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent" />
+          <ul id="pw-rules" class="mt-2 space-y-1 hidden">
+            <li id="rule-length"  class="flex items-center gap-1.5 text-xs text-slate-400"><span class="rule-icon">○</span> 8자 이상</li>
+            <li id="rule-upper"   class="flex items-center gap-1.5 text-xs text-slate-400"><span class="rule-icon">○</span> 대문자 포함 (A-Z)</li>
+            <li id="rule-lower"   class="flex items-center gap-1.5 text-xs text-slate-400"><span class="rule-icon">○</span> 소문자 포함 (a-z)</li>
+            <li id="rule-special" class="flex items-center gap-1.5 text-xs text-slate-400"><span class="rule-icon">○</span> 특수문자 포함</li>
+          </ul>
+        </div>
+        <button type="submit" id="signup-btn" disabled onclick="doSignup()"
+          class="w-full py-2.5 bg-cyan-600 hover:bg-cyan-700 disabled:bg-slate-300
+                 disabled:cursor-not-allowed text-white text-sm font-semibold
+                 rounded-lg transition-colors">
+          회원가입
+        </button>
+        <p id="signup-error" class="hidden text-xs text-red-500 text-center"></p>
+      </form>
+    </div>
+  </div>
+
+  <script type="module">
+    import { Auth, api } from './api.js';
+
+    // 이미 로그인 시 팀 화면으로
+    if (Auth.token()) location.href = '/static/teams.html';
+
+    const tabLogin  = document.getElementById('tab-login');
+    const tabSignup = document.getElementById('tab-signup');
+    const formLogin  = document.getElementById('form-login');
+    const formSignup = document.getElementById('form-signup');
+
+    tabLogin.addEventListener('click', () => {
+      formLogin.classList.remove('hidden'); formSignup.classList.add('hidden');
+      tabLogin.classList.replace('text-slate-400','text-cyan-600'); tabLogin.classList.add('border-b-2','border-cyan-600');
+      tabSignup.classList.replace('text-cyan-600','text-slate-400'); tabSignup.classList.remove('border-b-2','border-cyan-600');
+    });
+    tabSignup.addEventListener('click', () => {
+      formSignup.classList.remove('hidden'); formLogin.classList.add('hidden');
+      tabSignup.classList.replace('text-slate-400','text-cyan-600'); tabSignup.classList.add('border-b-2','border-cyan-600');
+      tabLogin.classList.replace('text-cyan-600','text-slate-400'); tabLogin.classList.remove('border-b-2','border-cyan-600');
+    });
+
+    const rules = {
+      length:  v => v.length >= 8,
+      upper:   v => /[A-Z]/.test(v),
+      lower:   v => /[a-z]/.test(v),
+      special: v => /[!@#$%^&*()\-_=+\[\]{};:'",.<>/?\\|`~]/.test(v),
+    };
+    window.checkPassword = function(val) {
+      document.getElementById('pw-rules').classList.toggle('hidden', !val);
+      let ok = true;
+      for (const [k, fn] of Object.entries(rules)) {
+        const p = fn(val);
+        if (!p) ok = false;
+        const li = document.getElementById('rule-' + k);
+        li.querySelector('.rule-icon').textContent = p ? '✓' : '○';
+        li.classList.toggle('text-emerald-500', p);
+        li.classList.toggle('text-slate-400', !p);
+      }
+      document.getElementById('signup-btn').disabled = !ok;
+    };
+
+    window.doLogin = async function() {
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+      const err = document.getElementById('login-error');
+      err.classList.add('hidden');
+      try {
+        const data = await api('/auth/login', { method:'POST', body: JSON.stringify({email, password}) });
+        Auth.save(data.token, data.user);
+        location.href = '/static/teams.html';
+      } catch {
+        err.classList.remove('hidden');
+      }
+    };
+
+    window.doSignup = async function() {
+      const email = document.getElementById('signup-email').value.trim();
+      const password = document.getElementById('signup-password').value;
+      const err = document.getElementById('signup-error');
+      err.classList.add('hidden');
+      try {
+        const data = await api('/auth/signup', { method:'POST', body: JSON.stringify({email, password}) });
+        Auth.save(data.token, data.user);
+        location.href = '/static/teams.html';
+      } catch(e) {
+        const code = e?.detail?.detail?.code;
+        err.textContent = code === 'EMAIL_EXISTS' ? '이미 사용 중인 이메일입니다.' : '회원가입에 실패했습니다.';
+        err.classList.remove('hidden');
+      }
+    };
+  </script>
+</body>
+</html>

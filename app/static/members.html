@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TaskFlow — 멤버</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 min-h-screen flex flex-col">
+  <header class="bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between shrink-0">
+    <div class="flex items-center gap-3">
+      <div class="w-7 h-7 bg-cyan-600 rounded-md flex items-center justify-center">
+        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2
+               M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+        </svg>
+      </div>
+      <div>
+        <span id="team-name" class="font-bold text-slate-800 text-sm"></span>
+        <span class="text-xs text-slate-400 ml-2">멤버</span>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <a id="kanban-link" href="#" class="text-xs font-medium text-slate-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg">칸반</a>
+      <a id="chat-link" href="#" class="text-xs font-medium text-slate-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg">채팅</a>
+      <button onclick="logout()" class="text-xs text-slate-400 hover:text-slate-600">로그아웃</button>
+    </div>
+  </header>
+
+  <div class="flex-1 max-w-lg mx-auto w-full px-4 py-6 space-y-4">
+    <!-- 초대코드 (owner만) -->
+    <div id="invite-section" class="hidden bg-white rounded-2xl border border-slate-200 shadow-sm p-4">
+      <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">초대코드</p>
+      <div class="flex items-center gap-3">
+        <span id="invite-code" class="text-2xl font-bold tracking-widest text-slate-800 font-mono"></span>
+        <button onclick="copyCode()" class="px-3 py-1.5 text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg">복사</button>
+      </div>
+    </div>
+
+    <!-- 멤버 목록 -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      <div class="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+        <span class="text-sm font-semibold text-slate-700">팀원</span>
+        <span id="member-count" class="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full"></span>
+      </div>
+      <div id="member-list"></div>
+    </div>
+
+    <!-- 팀 떠나기 -->
+    <div id="leave-section" class="hidden bg-white rounded-2xl border border-slate-200 shadow-sm p-4">
+      <button onclick="showLeaveModal()"
+        class="w-full py-2.5 text-sm text-red-500 border border-red-200 hover:bg-red-50 rounded-xl font-medium">
+        팀 떠나기
+      </button>
+    </div>
+  </div>
+
+  <!-- 팀 떠나기 확인 모달 -->
+  <div id="leave-modal" class="hidden fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div class="bg-white rounded-2xl shadow-xl w-80 p-5 space-y-4">
+      <div class="text-center">
+        <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
+          <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+          </svg>
+        </div>
+        <h3 class="font-semibold text-slate-800">팀을 떠나시겠습니까?</h3>
+        <p class="text-xs text-slate-500 mt-1">팀을 떠나면 칸반과 채팅에 접근할 수 없습니다.</p>
+      </div>
+      <div class="flex gap-2">
+        <button onclick="hideLeaveModal()" class="flex-1 py-2.5 text-sm text-slate-600 border border-slate-300 rounded-xl">취소</button>
+        <button onclick="leaveTeam()" class="flex-1 py-2.5 text-sm text-white bg-red-500 hover:bg-red-600 rounded-xl font-semibold">떠나기</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { Auth, api } from './api.js';
+    Auth.check();
+
+    const params = new URLSearchParams(location.search);
+    const teamId = params.get('team') || JSON.parse(localStorage.getItem('tf_team')||'{}').id;
+    if (!teamId) { location.href = '/static/teams.html'; }
+
+    const me = Auth.user();
+    document.getElementById('kanban-link').href = `/static/kanban.html?team=${teamId}`;
+    document.getElementById('chat-link').href   = `/static/chat.html?team=${teamId}`;
+
+    let teamData = {};
+
+    async function load() {
+      teamData = await api(`/teams/${teamId}`);
+      document.getElementById('team-name').textContent = teamData.name;
+
+      const isOwner = teamData.owner_id === me?.id;
+      if (isOwner) {
+        document.getElementById('invite-code').textContent = teamData.invite_code;
+        document.getElementById('invite-section').classList.remove('hidden');
+      } else {
+        document.getElementById('leave-section').classList.remove('hidden');
+      }
+
+      const members = await api(`/teams/${teamId}/members`);
+      document.getElementById('member-count').textContent = members.length + '명';
+      const ul = document.getElementById('member-list');
+      ul.innerHTML = members.map(m => {
+        const isMe = m.id === me?.id;
+        return `<div class="flex items-center gap-3 px-4 py-3 border-b border-slate-50 last:border-0">
+          <div class="w-9 h-9 rounded-full bg-cyan-100 flex items-center justify-center text-cyan-700 text-sm font-bold shrink-0">
+            ${(m.email[0]||'?').toUpperCase()}
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2">
+              <span class="text-sm font-medium text-slate-800">${m.email}</span>
+              ${m.id===teamData.owner_id?'<span class="text-xs bg-cyan-100 text-cyan-700 px-1.5 py-0.5 rounded-full font-medium">Owner</span>':''}
+              ${isMe?'<span class="text-xs bg-emerald-100 text-emerald-600 px-1.5 py-0.5 rounded-full">나</span>':''}
+            </div>
+            <span class="text-xs text-slate-400">${new Date(m.created_at).toLocaleDateString('ko-KR')} 합류</span>
+          </div>
+        </div>`;
+      }).join('');
+    }
+    load();
+
+    window.copyCode = function() {
+      navigator.clipboard.writeText(document.getElementById('invite-code').textContent);
+    };
+    window.showLeaveModal  = () => document.getElementById('leave-modal').classList.remove('hidden');
+    window.hideLeaveModal  = () => document.getElementById('leave-modal').classList.add('hidden');
+    window.leaveTeam = async function() {
+      await api(`/teams/${teamId}/leave`, {method:'DELETE'});
+      localStorage.removeItem('tf_team');
+      location.href = '/static/teams.html';
+    };
+    window.logout = () => { Auth.clear(); location.href='/static/login.html'; };
+  </script>
+</body>
+</html>

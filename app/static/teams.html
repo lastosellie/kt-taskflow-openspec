@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TaskFlow — 팀 선택</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 min-h-screen flex flex-col">
+  <header class="bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <div class="w-7 h-7 bg-cyan-600 rounded-md flex items-center justify-center">
+        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2
+               M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+        </svg>
+      </div>
+      <span class="font-bold text-slate-800 text-sm">TaskFlow</span>
+    </div>
+    <div class="flex items-center gap-3">
+      <span id="user-email" class="text-xs text-slate-400"></span>
+      <button onclick="logout()" class="text-xs text-slate-400 hover:text-slate-600">로그아웃</button>
+    </div>
+  </header>
+
+  <div class="flex-1 max-w-lg mx-auto w-full px-4 py-6 space-y-4">
+    <!-- 소속 팀 카드 (팀 있을 때) -->
+    <div id="my-team-section" class="hidden">
+      <h2 class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">내 팀</h2>
+      <div id="my-team-card" class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex items-center justify-between">
+        <div>
+          <p id="team-name" class="font-semibold text-slate-800"></p>
+          <p id="team-code" class="text-xs text-slate-400 font-mono mt-0.5"></p>
+        </div>
+        <a id="go-kanban" href="#"
+          class="px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-semibold
+                 rounded-xl transition-colors">
+          입장
+        </a>
+      </div>
+    </div>
+
+    <!-- 팀 없을 때 -->
+    <div id="no-team-section">
+      <!-- 팀 만들기 -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 space-y-3">
+        <h3 class="text-sm font-semibold text-slate-700">새 팀 만들기</h3>
+        <input id="new-team-name" type="text" placeholder="팀 이름을 입력하세요"
+          class="w-full px-3 py-2.5 text-sm border border-slate-300 rounded-lg
+                 focus:outline-none focus:ring-2 focus:ring-cyan-500" />
+        <button onclick="createTeam()"
+          class="w-full py-2.5 text-sm font-semibold text-white bg-cyan-600
+                 hover:bg-cyan-700 rounded-xl transition-colors">
+          팀 만들기
+        </button>
+        <p id="create-error" class="hidden text-xs text-red-500 text-center"></p>
+      </div>
+
+      <div class="text-center text-xs text-slate-400 my-2">또는</div>
+
+      <!-- 초대코드 합류 -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 space-y-3">
+        <h3 class="text-sm font-semibold text-slate-700">초대코드로 합류</h3>
+        <input id="invite-code" type="text" placeholder="ABCD-1234" maxlength="9"
+          class="w-full px-3 py-2.5 text-sm border border-slate-300 rounded-lg font-mono uppercase
+                 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+          oninput="this.value=this.value.toUpperCase()" />
+        <button onclick="joinTeam()"
+          class="w-full py-2.5 text-sm font-semibold text-slate-700 border border-slate-300
+                 hover:bg-slate-50 rounded-xl transition-colors">
+          팀 합류
+        </button>
+        <p id="join-error" class="hidden text-xs text-red-500 text-center"></p>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { Auth, api } from './api.js';
+    Auth.check();
+
+    const user = Auth.user();
+    document.getElementById('user-email').textContent = user?.email || '';
+
+    async function loadTeam() {
+      const me = await api('/auth/me');
+      if (me.team_id) {
+        const team = await api(`/teams/${me.team_id}`);
+        document.getElementById('my-team-section').classList.remove('hidden');
+        document.getElementById('no-team-section').classList.add('hidden');
+        document.getElementById('team-name').textContent = team.name;
+        document.getElementById('team-code').textContent = team.invite_code;
+        document.getElementById('go-kanban').href = `/static/kanban.html?team=${me.team_id}`;
+        localStorage.setItem('tf_team', JSON.stringify(team));
+      }
+    }
+    loadTeam();
+
+    window.logout = function() { Auth.clear(); location.href = '/static/login.html'; };
+
+    window.createTeam = async function() {
+      const name = document.getElementById('new-team-name').value.trim();
+      const err  = document.getElementById('create-error');
+      if (!name) return;
+      err.classList.add('hidden');
+      try {
+        const team = await api('/teams', { method:'POST', body: JSON.stringify({name}) });
+        localStorage.setItem('tf_team', JSON.stringify(team));
+        location.href = `/static/kanban.html?team=${team.id}`;
+      } catch(e) {
+        err.textContent = e?.detail?.detail?.message || '팀 생성에 실패했습니다.';
+        err.classList.remove('hidden');
+      }
+    };
+
+    window.joinTeam = async function() {
+      const code = document.getElementById('invite-code').value.trim();
+      const err  = document.getElementById('join-error');
+      if (!code) return;
+      err.classList.add('hidden');
+      try {
+        const team = await api('/teams/join', { method:'POST', body: JSON.stringify({invite_code: code}) });
+        localStorage.setItem('tf_team', JSON.stringify(team));
+        location.href = `/static/kanban.html?team=${team.id}`;
+      } catch(e) {
+        const code2 = e?.detail?.detail?.code;
+        err.textContent = code2 === 'TEAM_NOT_FOUND' ? '유효하지 않은 초대코드입니다.'
+          : code2 === 'ALREADY_IN_TEAM' ? '이미 다른 팀에 소속되어 있습니다.'
+          : '합류에 실패했습니다.';
+        err.classList.remove('hidden');
+      }
+    };
+  </script>
+</body>
+</html>
