@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TaskFlow — 팀 선택</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 min-h-screen">
+
+  <!-- 헤더 -->
+  <header class="bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <div class="w-7 h-7 bg-cyan-600 rounded-md flex items-center justify-center">
+        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2
+               M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        </svg>
+      </div>
+      <span class="font-bold text-slate-800">TaskFlow</span>
+    </div>
+    <div class="flex items-center gap-3">
+      <span class="text-xs text-slate-500">user@example.com</span>
+      <button class="text-xs text-slate-400 hover:text-slate-600">로그아웃</button>
+    </div>
+  </header>
+
+  <main class="max-w-lg mx-auto px-4 py-8 space-y-6">
+
+    <!-- 내 팀 목록 -->
+    <section>
+      <h2 class="text-sm font-semibold text-slate-600 mb-3">내 팀</h2>
+
+      <div class="space-y-2" id="team-list">
+        <!-- 팀 카드 예시 -->
+        <button class="w-full bg-white rounded-xl border border-slate-200 px-4 py-3.5
+                       flex items-center justify-between hover:border-cyan-400
+                       hover:shadow-sm transition-all group">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center
+                        text-orange-600 font-bold text-sm">A</div>
+            <div class="text-left">
+              <p class="text-sm font-semibold text-slate-800">Alpha 팀</p>
+              <p class="text-xs text-slate-400">멤버 4명</p>
+            </div>
+          </div>
+          <svg class="w-4 h-4 text-slate-300 group-hover:text-cyan-500 transition-colors"
+               fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </button>
+
+        <button class="w-full bg-white rounded-xl border border-slate-200 px-4 py-3.5
+                       flex items-center justify-between hover:border-cyan-400
+                       hover:shadow-sm transition-all group">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center
+                        text-purple-600 font-bold text-sm">B</div>
+            <div class="text-left">
+              <p class="text-sm font-semibold text-slate-800">Beta 팀</p>
+              <p class="text-xs text-slate-400">멤버 2명</p>
+            </div>
+          </div>
+          <svg class="w-4 h-4 text-slate-300 group-hover:text-cyan-500 transition-colors"
+               fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- 팀 없을 때 빈 상태 (숨김) -->
+      <div id="empty-state" class="hidden text-center py-8 text-slate-400 text-sm">
+        아직 소속된 팀이 없습니다.
+      </div>
+    </section>
+
+    <hr class="border-slate-200">
+
+    <!-- 팀 만들기 -->
+    <section>
+      <h2 class="text-sm font-semibold text-slate-600 mb-3">새 팀 만들기</h2>
+      <div class="bg-white rounded-xl border border-slate-200 p-4 space-y-3">
+        <input type="text" placeholder="팀 이름을 입력하세요"
+          class="w-full px-3 py-2.5 text-sm border border-slate-300 rounded-lg
+                 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent
+                 placeholder:text-slate-400" />
+        <button class="w-full py-2.5 bg-cyan-600 hover:bg-cyan-700 text-white text-sm
+                       font-semibold rounded-lg transition-colors">
+          팀 만들기
+        </button>
+      </div>
+    </section>
+
+    <!-- 초대코드로 합류 -->
+    <section>
+      <h2 class="text-sm font-semibold text-slate-600 mb-3">초대코드로 합류</h2>
+      <div class="bg-white rounded-xl border border-slate-200 p-4 space-y-3">
+        <input type="text" placeholder="초대코드 입력 (예: ABCD-1234)"
+          class="w-full px-3 py-2.5 text-sm border border-slate-300 rounded-lg
+                 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent
+                 placeholder:text-slate-400 tracking-widest font-mono" />
+        <button class="w-full py-2.5 bg-slate-700 hover:bg-slate-800 text-white text-sm
+                       font-semibold rounded-lg transition-colors">
+          팀 합류
+        </button>
+        <p id="join-error" class="hidden text-xs text-red-500 text-center">
+          유효하지 않은 초대코드입니다.
+        </p>
+      </div>
+    </section>
+
+  </main>
+</body>
+</html>

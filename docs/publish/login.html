@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TaskFlow — 로그인</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 min-h-screen flex items-center justify-center">
+
+  <div class="w-full max-w-sm">
+
+    <!-- 로고 -->
+    <div class="text-center mb-8">
+      <div class="inline-flex items-center gap-2">
+        <div class="w-9 h-9 bg-cyan-600 rounded-lg flex items-center justify-center">
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2
+                 M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          </svg>
+        </div>
+        <span class="text-2xl font-bold text-slate-800">TaskFlow</span>
+      </div>
+      <p class="text-sm text-slate-500 mt-1">팀 업무를 한 화면에서</p>
+    </div>
+
+    <!-- 탭: 로그인 / 회원가입 -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+      <div class="flex border-b border-slate-200">
+        <button id="tab-login"
+          class="flex-1 py-3 text-sm font-semibold text-cyan-600 border-b-2 border-cyan-600">
+          로그인
+        </button>
+        <button id="tab-signup"
+          class="flex-1 py-3 text-sm font-semibold text-slate-400">
+          회원가입
+        </button>
+      </div>
+
+      <!-- 로그인 폼 -->
+      <div id="form-login" class="p-6 space-y-4">
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">이메일</label>
+          <input type="email" placeholder="example@email.com"
+            class="w-full px-3 py-2.5 text-sm border border-slate-300 rounded-lg
+                   focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent
+                   placeholder:text-slate-400" />
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">비밀번호</label>
+          <input type="password" placeholder="••••••••"
+            class="w-full px-3 py-2.5 text-sm border border-slate-300 rounded-lg
+                   focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent
+                   placeholder:text-slate-400" />
+        </div>
+        <button
+          class="w-full py-2.5 bg-cyan-600 hover:bg-cyan-700 text-white text-sm font-semibold
+                 rounded-lg transition-colors">
+          로그인
+        </button>
+        <!-- 에러 메시지 (숨김 상태) -->
+        <p id="login-error" class="hidden text-xs text-red-500 text-center">
+          이메일 또는 비밀번호가 올바르지 않습니다.
+        </p>
+      </div>
+
+      <!-- 회원가입 폼 (숨김) -->
+      <div id="form-signup" class="hidden p-6 space-y-4">
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">이메일</label>
+          <input type="email" placeholder="example@email.com"
+            class="w-full px-3 py-2.5 text-sm border border-slate-300 rounded-lg
+                   focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent
+                   placeholder:text-slate-400" />
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">비밀번호</label>
+          <input type="password" placeholder="8자 이상"
+            class="w-full px-3 py-2.5 text-sm border border-slate-300 rounded-lg
+                   focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent
+                   placeholder:text-slate-400" />
+        </div>
+        <button
+          class="w-full py-2.5 bg-cyan-600 hover:bg-cyan-700 text-white text-sm font-semibold
+                 rounded-lg transition-colors">
+          회원가입
+        </button>
+        <p id="signup-error" class="hidden text-xs text-red-500 text-center">
+          이미 사용 중인 이메일입니다.
+        </p>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const tabLogin  = document.getElementById('tab-login');
+    const tabSignup = document.getElementById('tab-signup');
+    const formLogin  = document.getElementById('form-login');
+    const formSignup = document.getElementById('form-signup');
+
+    tabLogin.addEventListener('click', () => {
+      formLogin.classList.remove('hidden');
+      formSignup.classList.add('hidden');
+      tabLogin.classList.replace('text-slate-400', 'text-cyan-600');
+      tabLogin.classList.add('border-b-2', 'border-cyan-600');
+      tabSignup.classList.replace('text-cyan-600', 'text-slate-400');
+      tabSignup.classList.remove('border-b-2', 'border-cyan-600');
+    });
+
+    tabSignup.addEventListener('click', () => {
+      formSignup.classList.remove('hidden');
+      formLogin.classList.add('hidden');
+      tabSignup.classList.replace('text-slate-400', 'text-cyan-600');
+      tabSignup.classList.add('border-b-2', 'border-cyan-600');
+      tabLogin.classList.replace('text-cyan-600', 'text-slate-400');
+      tabLogin.classList.remove('border-b-2', 'border-cyan-600');
+    });
+  </script>
+</body>
+</html>

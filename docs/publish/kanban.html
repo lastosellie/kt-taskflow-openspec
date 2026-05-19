@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TaskFlow — 칸반</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .task-card { cursor: grab; }
+    .task-card:active { cursor: grabbing; }
+    .column-drop-target { transition: background-color 0.15s; }
+    .column-drop-target.drag-over { background-color: #e0f2fe; }
+  </style>
+</head>
+<body class="bg-slate-100 min-h-screen flex flex-col">
+
+  <!-- 헤더 -->
+  <header class="bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between shrink-0">
+    <div class="flex items-center gap-3">
+      <div class="w-7 h-7 bg-cyan-600 rounded-md flex items-center justify-center">
+        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2
+               M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        </svg>
+      </div>
+      <div>
+        <span class="font-bold text-slate-800 text-sm">Alpha 팀</span>
+        <span class="text-xs text-slate-400 ml-2">칸반</span>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <a href="chat.html"
+         class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-600
+                hover:bg-slate-100 rounded-lg transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8
+               a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12
+               c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+        </svg>
+        채팅
+      </a>
+      <span class="text-xs text-slate-400">user@example.com</span>
+      <button class="text-xs text-slate-400 hover:text-slate-600">로그아웃</button>
+    </div>
+  </header>
+
+  <!-- 칸반 보드 -->
+  <div class="flex gap-4 p-4 flex-1 overflow-x-auto">
+
+    <!-- TODO 컬럼 -->
+    <div class="flex flex-col w-72 shrink-0">
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-slate-400"></span>
+          <h3 class="text-sm font-semibold text-slate-700">TODO</h3>
+          <span class="text-xs bg-slate-200 text-slate-500 px-1.5 py-0.5 rounded-full" id="count-todo">2</span>
+        </div>
+        <button onclick="openAddModal('TODO')"
+          class="w-6 h-6 flex items-center justify-center rounded-md hover:bg-slate-200
+                 text-slate-400 hover:text-slate-600 transition-colors text-lg leading-none">+</button>
+      </div>
+      <div class="space-y-2 flex-1 column-drop-target rounded-xl p-1 min-h-32"
+           data-status="TODO" id="col-todo">
+        <!-- 태스크 카드 -->
+        <div class="task-card bg-white rounded-xl border border-slate-200 p-3.5 shadow-sm
+                    hover:shadow-md hover:border-slate-300 transition-all"
+             draggable="true" data-id="1">
+          <p class="text-sm text-slate-800 font-medium leading-snug">API 엔드포인트 설계</p>
+          <div class="mt-2.5 flex items-center justify-between">
+            <span class="text-xs text-slate-400">user@example.com</span>
+            <button class="text-slate-300 hover:text-red-400 transition-colors"
+                    onclick="deleteTask(1)">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="task-card bg-white rounded-xl border border-slate-200 p-3.5 shadow-sm
+                    hover:shadow-md hover:border-slate-300 transition-all"
+             draggable="true" data-id="2">
+          <p class="text-sm text-slate-800 font-medium leading-snug">DB 스키마 작성</p>
+          <div class="mt-2.5 flex items-center justify-between">
+            <span class="text-xs text-slate-400">user2@example.com</span>
+            <button class="text-slate-300 hover:text-red-400 transition-colors"
+                    onclick="deleteTask(2)">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DOING 컬럼 -->
+    <div class="flex flex-col w-72 shrink-0">
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-orange-400"></span>
+          <h3 class="text-sm font-semibold text-slate-700">DOING</h3>
+          <span class="text-xs bg-orange-100 text-orange-600 px-1.5 py-0.5 rounded-full" id="count-doing">1</span>
+        </div>
+        <button onclick="openAddModal('DOING')"
+          class="w-6 h-6 flex items-center justify-center rounded-md hover:bg-slate-200
+                 text-slate-400 hover:text-slate-600 transition-colors text-lg leading-none">+</button>
+      </div>
+      <div class="space-y-2 flex-1 column-drop-target rounded-xl p-1 min-h-32"
+           data-status="DOING" id="col-doing">
+        <div class="task-card bg-white rounded-xl border border-orange-200 p-3.5 shadow-sm
+                    hover:shadow-md hover:border-orange-300 transition-all"
+             draggable="true" data-id="3">
+          <p class="text-sm text-slate-800 font-medium leading-snug">FastAPI 인증 구현</p>
+          <div class="mt-2.5 flex items-center justify-between">
+            <span class="text-xs text-slate-400">user@example.com</span>
+            <button class="text-slate-300 hover:text-red-400 transition-colors"
+                    onclick="deleteTask(3)">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DONE 컬럼 -->
+    <div class="flex flex-col w-72 shrink-0">
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+          <h3 class="text-sm font-semibold text-slate-700">DONE</h3>
+          <span class="text-xs bg-emerald-100 text-emerald-600 px-1.5 py-0.5 rounded-full" id="count-done">1</span>
+        </div>
+        <button onclick="openAddModal('DONE')"
+          class="w-6 h-6 flex items-center justify-center rounded-md hover:bg-slate-200
+                 text-slate-400 hover:text-slate-600 transition-colors text-lg leading-none">+</button>
+      </div>
+      <div class="space-y-2 flex-1 column-drop-target rounded-xl p-1 min-h-32"
+           data-status="DONE" id="col-done">
+        <div class="task-card bg-white rounded-xl border border-emerald-200 p-3.5 shadow-sm
+                    hover:shadow-md hover:border-emerald-300 transition-all opacity-70"
+             draggable="true" data-id="4">
+          <p class="text-sm text-slate-500 font-medium leading-snug line-through">프로젝트 초기 설정</p>
+          <div class="mt-2.5 flex items-center justify-between">
+            <span class="text-xs text-slate-400">user@example.com</span>
+            <button class="text-slate-300 hover:text-red-400 transition-colors"
+                    onclick="deleteTask(4)">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 태스크 추가 모달 -->
+  <div id="add-modal" class="hidden fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div class="bg-white rounded-2xl shadow-xl w-80 p-5 space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="font-semibold text-slate-800 text-sm">태스크 추가</h3>
+        <button onclick="closeAddModal()" class="text-slate-400 hover:text-slate-600">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <input id="new-task-title" type="text" placeholder="태스크 제목을 입력하세요"
+        class="w-full px-3 py-2.5 text-sm border border-slate-300 rounded-lg
+               focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent
+               placeholder:text-slate-400" />
+      <div class="flex gap-2">
+        <button onclick="closeAddModal()"
+          class="flex-1 py-2 text-sm text-slate-600 border border-slate-300
+                 rounded-lg hover:bg-slate-50 transition-colors">
+          취소
+        </button>
+        <button onclick="addTask()"
+          class="flex-1 py-2 text-sm text-white bg-cyan-600 hover:bg-cyan-700
+                 rounded-lg transition-colors font-semibold">
+          추가
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let draggedCard = null;
+    let currentColumn = '';
+
+    function openAddModal(status) {
+      currentColumn = status;
+      document.getElementById('add-modal').classList.remove('hidden');
+      document.getElementById('new-task-title').focus();
+    }
+    function closeAddModal() {
+      document.getElementById('add-modal').classList.add('hidden');
+      document.getElementById('new-task-title').value = '';
+    }
+    function addTask() {
+      const title = document.getElementById('new-task-title').value.trim();
+      if (!title) return;
+      const colId = 'col-' + currentColumn.toLowerCase();
+      const col = document.getElementById(colId);
+      const card = document.createElement('div');
+      card.className = 'task-card bg-white rounded-xl border border-slate-200 p-3.5 shadow-sm hover:shadow-md hover:border-slate-300 transition-all';
+      card.draggable = true;
+      card.innerHTML = `
+        <p class="text-sm text-slate-800 font-medium leading-snug">${title}</p>
+        <div class="mt-2.5 flex items-center justify-between">
+          <span class="text-xs text-slate-400">user@example.com</span>
+        </div>`;
+      setupDrag(card);
+      col.appendChild(card);
+      closeAddModal();
+    }
+    function deleteTask(id) {
+      const card = document.querySelector(`[data-id="${id}"]`);
+      if (card) card.remove();
+    }
+
+    // 드래그 앤 드롭
+    function setupDrag(card) {
+      card.addEventListener('dragstart', e => {
+        draggedCard = card;
+        setTimeout(() => card.classList.add('opacity-50'), 0);
+      });
+      card.addEventListener('dragend', () => {
+        card.classList.remove('opacity-50');
+        draggedCard = null;
+      });
+    }
+
+    document.querySelectorAll('.task-card').forEach(setupDrag);
+
+    document.querySelectorAll('.column-drop-target').forEach(col => {
+      col.addEventListener('dragover', e => {
+        e.preventDefault();
+        col.classList.add('drag-over');
+      });
+      col.addEventListener('dragleave', () => col.classList.remove('drag-over'));
+      col.addEventListener('drop', e => {
+        e.preventDefault();
+        col.classList.remove('drag-over');
+        if (draggedCard) col.appendChild(draggedCard);
+      });
+    });
+  </script>
+</body>
+</html>
