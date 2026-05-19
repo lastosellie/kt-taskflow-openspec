@@ -1,7 +1,10 @@
-## ADDED Requirements
+# auth Specification
 
+## Purpose
+TBD - created by archiving change taskflow-mvp. Update Purpose after archive.
+## Requirements
 ### Requirement: 회원가입
-시스템은 이메일과 비밀번호로 신규 사용자를 등록해야 한다. 비밀번호는 bcrypt로 해시 저장하고, 성공 시 JWT를 반환해야 한다.
+시스템은 이메일과 비밀번호로 신규 사용자를 등록해야 한다(MUST). 비밀번호는 bcrypt로 해시 저장하고, 성공 시 JWT를 반환해야 한다. 비밀번호는 8자 이상, 대문자·소문자·특수문자를 모두 포함해야 한다.
 
 #### Scenario: 정상 회원가입
 - **WHEN** `POST /auth/signup` { email, password } 요청 시
@@ -26,7 +29,7 @@
 ---
 
 ### Requirement: 로그인
-시스템은 이메일과 비밀번호로 사용자를 인증하고 JWT를 발급해야 한다. JWT 유효기간은 24시간이며 갱신(refresh) 없다.
+시스템은 이메일과 비밀번호로 사용자를 인증하고 JWT를 발급해야 한다(MUST). JWT 유효기간은 24시간이며 갱신(refresh) 없다.
 
 #### Scenario: 정상 로그인
 - **WHEN** `POST /auth/login` { email, password } 요청 시 (자격증명 일치)
@@ -39,7 +42,7 @@
 ---
 
 ### Requirement: 내 정보 조회
-시스템은 유효한 JWT를 가진 사용자의 정보를 반환해야 한다.
+시스템은 유효한 JWT를 가진 사용자의 정보를 반환해야 한다(MUST).
 
 #### Scenario: 정상 조회
 - **WHEN** `GET /auth/me` Authorization: Bearer {token} 요청 시
@@ -52,8 +55,9 @@
 ---
 
 ### Requirement: 로그아웃
-시스템은 로그아웃 엔드포인트를 제공해야 한다. 서버는 무상태이므로 클라이언트의 localStorage 토큰 삭제를 안내한다.
+시스템은 로그아웃 엔드포인트를 제공해야 한다(MUST). 서버는 무상태이므로 클라이언트의 localStorage 토큰 삭제를 안내한다.
 
 #### Scenario: 로그아웃 요청
 - **WHEN** `POST /auth/logout` Authorization: Bearer {token} 요청 시
 - **THEN** 200, { message: "로그아웃되었습니다" } 반환 (서버 상태 변경 없음)
+

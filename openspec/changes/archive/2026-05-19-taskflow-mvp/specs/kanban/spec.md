@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: 태스크 생성
-시스템은 팀 소속 멤버가 팀에 새 태스크를 추가할 수 있어야 한다. 생성 시 기본 status는 TODO이며, assignee_id는 선택 입력이다.
+시스템은 팀 소속 멤버가 팀에 새 태스크를 추가할 수 있어야 한다(MUST). 생성 시 기본 status는 TODO이며, assignee_id는 선택 입력이다.
 
 #### Scenario: 정상 생성
 - **WHEN** `POST /teams/{id}/tasks` { title, assignee_id? } 요청 시 (인증됨, 해당 팀 소속)
@@ -18,7 +18,7 @@
 ---
 
 ### Requirement: 팀 태스크 목록 조회
-시스템은 특정 팀의 전체 태스크를 반환해야 한다. 칸반 3컬럼(TODO/DOING/DONE)으로 클라이언트에서 분류한다. `filter` 쿼리 파라미터로 @me(내 담당) 또는 unassigned(미할당) 필터링을 지원한다.
+시스템은 특정 팀의 전체 태스크를 반환해야 한다(MUST). 칸반 3컬럼(TODO/DOING/DONE)으로 클라이언트에서 분류한다. `filter` 쿼리 파라미터로 @me(내 담당) 또는 unassigned(미할당) 필터링을 지원한다.
 
 #### Scenario: 전체 조회
 - **WHEN** `GET /teams/{id}/tasks` 요청 시 (인증됨, 해당 팀 소속)
@@ -35,7 +35,7 @@
 ---
 
 ### Requirement: 태스크 단건 조회
-시스템은 특정 태스크의 상세 정보를 반환해야 한다.
+시스템은 특정 태스크의 상세 정보를 반환해야 한다(MUST).
 
 #### Scenario: 정상 조회
 - **WHEN** `GET /tasks/{id}` 요청 시 (인증됨, 해당 태스크의 팀 소속)
@@ -48,7 +48,7 @@
 ---
 
 ### Requirement: 태스크 상태 변경 (드래그 앤 드롭)
-시스템은 태스크의 status만 경량으로 변경할 수 있어야 한다. 칸반 드래그 앤 드롭 시 호출되는 전용 엔드포인트다.
+시스템은 태스크의 status만 경량으로 변경할 수 있어야 한다(MUST). 칸반 드래그 앤 드롭 시 호출되는 전용 엔드포인트다.
 
 #### Scenario: status 변경 성공
 - **WHEN** `PATCH /tasks/{id}/status` { status: "DOING" } 요청 시 (인증됨, 해당 팀 소속)
@@ -61,7 +61,7 @@
 ---
 
 ### Requirement: 태스크 상세 수정 (카드 모달)
-시스템은 태스크의 title과 assignee_id를 수정할 수 있어야 한다. 카드 상세 모달에서 호출되는 전용 엔드포인트다.
+시스템은 태스크의 title과 assignee_id를 수정할 수 있어야 한다(MUST). 카드 상세 모달에서 호출되는 전용 엔드포인트다.
 
 #### Scenario: title 변경
 - **WHEN** `PUT /tasks/{id}` { title: "새 제목" } 요청 시 (인증됨, 해당 팀 소속)
@@ -78,7 +78,7 @@
 ---
 
 ### Requirement: 태스크 삭제
-시스템은 팀 소속 멤버가 태스크를 삭제할 수 있어야 한다. owner는 모든 태스크를 삭제할 수 있고, 일반 멤버는 본인이 생성한 태스크만 삭제할 수 있다.
+시스템은 팀 소속 멤버가 태스크를 삭제할 수 있어야 한다(MUST). owner는 모든 태스크를 삭제할 수 있고, 일반 멤버는 본인이 생성한 태스크만 삭제할 수 있다.
 
 #### Scenario: owner가 임의 태스크 삭제
 - **WHEN** `DELETE /tasks/{id}` 요청 시 (인증됨, 팀 owner)
