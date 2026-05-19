@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>TaskFlow — 채팅 (모바일)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { -webkit-tap-highlight-color: transparent; }
+    html, body { height: 100%; overflow: hidden; }
+    #message-list { -webkit-overflow-scrolling: touch; }
+  </style>
+</head>
+<body class="bg-slate-100 h-full flex flex-col">
+
+  <!-- 모바일 헤더 -->
+  <header class="bg-white border-b border-slate-200 px-4 py-3 flex items-center gap-3 shrink-0">
+    <a href="kanban-mobile.html"
+       class="p-1.5 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+      </svg>
+    </a>
+    <div class="flex items-center gap-2 flex-1">
+      <div class="w-7 h-7 bg-cyan-600 rounded-md flex items-center justify-center">
+        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2
+               M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        </svg>
+      </div>
+      <div>
+        <span class="font-bold text-slate-800 text-sm">Alpha 팀</span>
+        <div class="flex items-center gap-1 mt-0.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span class="text-xs text-slate-400">실시간</span>
+        </div>
+      </div>
+    </div>
+    <span class="text-xs text-slate-400">user@</span>
+  </header>
+
+  <!-- 메시지 리스트 -->
+  <div class="flex-1 overflow-y-auto px-3 py-3 space-y-3" id="message-list">
+
+    <!-- 날짜 구분선 -->
+    <div class="flex items-center gap-3 my-2">
+      <div class="flex-1 h-px bg-slate-200"></div>
+      <span class="text-xs text-slate-400 shrink-0">2024년 1월 15일</span>
+      <div class="flex-1 h-px bg-slate-200"></div>
+    </div>
+
+    <!-- 타인 메시지 -->
+    <div class="flex items-end gap-2 message-item">
+      <div class="w-7 h-7 rounded-full bg-orange-200 flex items-center justify-center
+                  text-orange-700 text-xs font-bold shrink-0">A</div>
+      <div class="max-w-[75vw]">
+        <span class="text-xs font-semibold text-slate-600 block mb-1 ml-1">user2@</span>
+        <div class="bg-white rounded-2xl rounded-bl-sm px-3.5 py-2.5 shadow-sm
+                    border border-slate-100 text-sm text-slate-800">
+          API 설계 먼저 끝내고 DB 작업 시작할게요
+        </div>
+        <span class="text-xs text-slate-400 ml-1 mt-0.5 block">09:30</span>
+      </div>
+    </div>
+
+    <!-- 내 메시지 -->
+    <div class="flex items-end gap-2 flex-row-reverse message-item">
+      <div class="w-7 h-7 rounded-full bg-cyan-200 flex items-center justify-center
+                  text-cyan-700 text-xs font-bold shrink-0">U</div>
+      <div class="max-w-[75vw]">
+        <div class="bg-cyan-600 rounded-2xl rounded-br-sm px-3.5 py-2.5 shadow-sm
+                    text-sm text-white">
+          네, 칸반에 태스크 추가해놨어요
+        </div>
+        <span class="text-xs text-slate-400 mr-1 mt-0.5 block text-right">09:32</span>
+      </div>
+    </div>
+
+    <!-- 타인 메시지 -->
+    <div class="flex items-end gap-2 message-item">
+      <div class="w-7 h-7 rounded-full bg-orange-200 flex items-center justify-center
+                  text-orange-700 text-xs font-bold shrink-0">A</div>
+      <div class="max-w-[75vw]">
+        <div class="bg-white rounded-2xl rounded-bl-sm px-3.5 py-2.5 shadow-sm
+                    border border-slate-100 text-sm text-slate-800">
+          확인했습니다! DOING으로 이동할게요
+        </div>
+        <span class="text-xs text-slate-400 ml-1 mt-0.5 block">09:35</span>
+      </div>
+    </div>
+
+    <!-- 내 메시지 (삭제 가능 — 길게 누르기) -->
+    <div class="flex items-end gap-2 flex-row-reverse message-item group" id="msg-1">
+      <div class="w-7 h-7 rounded-full bg-cyan-200 flex items-center justify-center
+                  text-cyan-700 text-xs font-bold shrink-0">U</div>
+      <div class="max-w-[75vw]">
+        <div class="bg-cyan-600 rounded-2xl rounded-br-sm px-3.5 py-2.5 shadow-sm
+                    text-sm text-white relative"
+             oncontextmenu="showDeleteMenu('msg-1', event); return false;"
+             ontouchstart="startLongPress('msg-1')"
+             ontouchend="cancelLongPress()">
+          👍 좋아요!
+        </div>
+        <span class="text-xs text-slate-400 mr-1 mt-0.5 block text-right">09:40</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 삭제 컨텍스트 메뉴 -->
+  <div id="delete-menu" class="hidden fixed z-50 bg-white rounded-xl shadow-xl border border-slate-200 p-1" style="min-width:120px">
+    <button onclick="deleteMessage()" class="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-500 hover:bg-red-50 rounded-lg">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+      </svg>
+      삭제
+    </button>
+  </div>
+
+  <!-- 입력창 (하단 고정) -->
+  <div class="bg-white border-t border-slate-200 px-3 py-2 shrink-0 safe-area-bottom">
+    <div class="flex items-end gap-2">
+      <div class="flex-1 relative">
+        <textarea id="message-input"
+          placeholder="메시지 입력... (Enter: 전송)"
+          rows="1"
+          maxlength="1000"
+          class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-2xl
+                 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent
+                 placeholder:text-slate-400 resize-none overflow-hidden leading-relaxed"
+          style="min-height: 42px; max-height: 100px;"></textarea>
+      </div>
+      <button id="send-btn"
+        class="w-11 h-11 bg-cyan-600 hover:bg-cyan-700 disabled:bg-slate-200
+               rounded-2xl flex items-center justify-center transition-colors shrink-0
+               active:scale-95"
+        onclick="sendMessage()">
+        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+        </svg>
+      </button>
+    </div>
+    <span class="text-xs text-slate-300 mt-1 block text-right" id="char-count">0/1000</span>
+  </div>
+
+  <script>
+    const input = document.getElementById('message-input');
+    const charCount = document.getElementById('char-count');
+    let longPressTimer = null;
+    let targetMsgId = null;
+    const deleteMenu = document.getElementById('delete-menu');
+
+    input.addEventListener('input', () => {
+      input.style.height = 'auto';
+      input.style.height = Math.min(input.scrollHeight, 100) + 'px';
+      charCount.textContent = input.value.length + '/1000';
+    });
+
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+
+    function sendMessage() {
+      const text = input.value.trim();
+      if (!text) return;
+
+      const list = document.getElementById('message-list');
+      const now = new Date();
+      const time = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+      const id = 'msg-' + Date.now();
+
+      const msgEl = document.createElement('div');
+      msgEl.id = id;
+      msgEl.className = 'flex items-end gap-2 flex-row-reverse message-item';
+      msgEl.innerHTML = `
+        <div class="w-7 h-7 rounded-full bg-cyan-200 flex items-center justify-center text-cyan-700 text-xs font-bold shrink-0">U</div>
+        <div class="max-w-[75vw]">
+          <div class="bg-cyan-600 rounded-2xl rounded-br-sm px-3.5 py-2.5 shadow-sm text-sm text-white"
+               oncontextmenu="showDeleteMenu('${id}', event); return false;"
+               ontouchstart="startLongPress('${id}')" ontouchend="cancelLongPress()">
+            ${text.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>')}
+          </div>
+          <span class="text-xs text-slate-400 mr-1 mt-0.5 block text-right">${time}</span>
+        </div>`;
+
+      list.appendChild(msgEl);
+      list.scrollTop = list.scrollHeight;
+      input.value = '';
+      input.style.height = '42px';
+      charCount.textContent = '0/1000';
+    }
+
+    function startLongPress(id) {
+      targetMsgId = id;
+      longPressTimer = setTimeout(() => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const rect = el.querySelector('div').getBoundingClientRect();
+        deleteMenu.style.top = (rect.top - 50) + 'px';
+        deleteMenu.style.left = Math.max(8, rect.left) + 'px';
+        deleteMenu.classList.remove('hidden');
+      }, 500);
+    }
+
+    function cancelLongPress() {
+      clearTimeout(longPressTimer);
+    }
+
+    function showDeleteMenu(id, e) {
+      targetMsgId = id;
+      deleteMenu.style.top = (e.clientY - 50) + 'px';
+      deleteMenu.style.left = e.clientX + 'px';
+      deleteMenu.classList.remove('hidden');
+    }
+
+    function deleteMessage() {
+      if (targetMsgId) {
+        const el = document.getElementById(targetMsgId);
+        if (el) el.remove();
+      }
+      deleteMenu.classList.add('hidden');
+      targetMsgId = null;
+    }
+
+    document.addEventListener('click', e => {
+      if (!deleteMenu.contains(e.target)) {
+        deleteMenu.classList.add('hidden');
+      }
+    });
+
+    window.addEventListener('load', () => {
+      document.getElementById('message-list').scrollTop = 99999;
+    });
+
+    // 5초 폴링 슬롯
+    let lastSince = new Date().toISOString();
+    setInterval(() => {
+      // fetch(`/teams/{id}/messages?since=${lastSince}`)
+    }, 5000);
+  </script>
+</body>
+</html>

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>TaskFlow — 칸반 (모바일)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { -webkit-tap-highlight-color: transparent; }
+    .tab-active { border-bottom: 2px solid currentColor; }
+  </style>
+</head>
+<body class="bg-slate-100 min-h-screen flex flex-col">
+
+  <!-- 모바일 헤더 -->
+  <header class="bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between shrink-0">
+    <div class="flex items-center gap-2">
+      <div class="w-7 h-7 bg-cyan-600 rounded-md flex items-center justify-center">
+        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2
+               M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        </svg>
+      </div>
+      <span class="font-bold text-slate-800 text-sm">Alpha 팀</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <a href="chat-mobile.html"
+         class="p-1.5 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8
+               a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12
+               c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+        </svg>
+      </a>
+      <a href="members.html"
+         class="p-1.5 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+        </svg>
+      </a>
+    </div>
+  </header>
+
+  <!-- 필터 + 컬럼 탭 -->
+  <div class="bg-white border-b border-slate-200 shrink-0">
+    <!-- @me / 전체 필터 -->
+    <div class="flex gap-2 px-4 pt-2.5">
+      <button id="filter-all" onclick="setFilter('all')"
+        class="px-3 py-1 text-xs font-medium rounded-full bg-slate-800 text-white transition-colors">
+        전체
+      </button>
+      <button id="filter-me" onclick="setFilter('me')"
+        class="px-3 py-1 text-xs font-medium rounded-full bg-slate-100 text-slate-500 transition-colors">
+        @내 태스크
+      </button>
+      <button id="filter-unassigned" onclick="setFilter('unassigned')"
+        class="px-3 py-1 text-xs font-medium rounded-full bg-slate-100 text-slate-500 transition-colors">
+        미할당
+      </button>
+    </div>
+
+    <!-- 컬럼 탭 -->
+    <div class="flex mt-2">
+      <button id="tab-todo" onclick="switchTab('todo')"
+        class="flex-1 py-2.5 text-sm font-semibold text-slate-700 tab-active border-slate-700 flex items-center justify-center gap-1.5">
+        <span class="w-2 h-2 rounded-full bg-slate-400"></span>
+        TODO
+        <span class="text-xs bg-slate-200 text-slate-500 px-1.5 py-0.5 rounded-full">2</span>
+      </button>
+      <button id="tab-doing" onclick="switchTab('doing')"
+        class="flex-1 py-2.5 text-sm font-semibold text-slate-400 flex items-center justify-center gap-1.5">
+        <span class="w-2 h-2 rounded-full bg-orange-400"></span>
+        DOING
+        <span class="text-xs bg-orange-100 text-orange-500 px-1.5 py-0.5 rounded-full">1</span>
+      </button>
+      <button id="tab-done" onclick="switchTab('done')"
+        class="flex-1 py-2.5 text-sm font-semibold text-slate-400 flex items-center justify-center gap-1.5">
+        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+        DONE
+        <span class="text-xs bg-emerald-100 text-emerald-600 px-1.5 py-0.5 rounded-full">1</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 태스크 리스트 -->
+  <div class="flex-1 overflow-y-auto p-4 space-y-2" id="task-list">
+
+    <!-- TODO 카드들 -->
+    <div class="col-todo">
+      <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm active:shadow-md transition-all">
+        <p class="text-sm text-slate-800 font-medium leading-snug">API 엔드포인트 설계</p>
+        <div class="mt-3 flex items-center justify-between">
+          <div class="flex items-center gap-1.5">
+            <div class="w-5 h-5 rounded-full bg-orange-200 flex items-center justify-center text-orange-700 text-xs font-bold">A</div>
+            <span class="text-xs text-slate-400">user2@example.com</span>
+          </div>
+          <button class="p-1 text-slate-300 hover:text-red-400 transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm active:shadow-md transition-all">
+        <p class="text-sm text-slate-800 font-medium leading-snug">DB 스키마 작성</p>
+        <div class="mt-3 flex items-center justify-between">
+          <div class="flex items-center gap-1.5">
+            <div class="w-5 h-5 rounded-full bg-cyan-200 flex items-center justify-center text-cyan-700 text-xs font-bold">U</div>
+            <span class="text-xs text-slate-400">user@example.com</span>
+          </div>
+          <button class="p-1 text-slate-300 hover:text-red-400 transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- DOING 카드들 (숨김) -->
+    <div class="col-doing hidden">
+      <div class="bg-white rounded-xl border border-orange-200 p-4 shadow-sm">
+        <p class="text-sm text-slate-800 font-medium leading-snug">FastAPI 인증 구현</p>
+        <div class="mt-3 flex items-center justify-between">
+          <span class="text-xs text-slate-400">미할당</span>
+          <button class="p-1 text-slate-300 hover:text-red-400 transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- DONE 카드들 (숨김) -->
+    <div class="col-done hidden">
+      <div class="bg-white rounded-xl border border-emerald-200 p-4 shadow-sm opacity-70">
+        <p class="text-sm text-slate-500 font-medium leading-snug line-through">프로젝트 초기 설정</p>
+        <div class="mt-3 flex items-center justify-between">
+          <div class="flex items-center gap-1.5">
+            <div class="w-5 h-5 rounded-full bg-cyan-200 flex items-center justify-center text-cyan-700 text-xs font-bold">U</div>
+            <span class="text-xs text-slate-400">user@example.com</span>
+          </div>
+          <button class="p-1 text-slate-300 hover:text-red-400 transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FAB 추가 버튼 -->
+  <button onclick="openAddModal()"
+    class="fixed right-5 bottom-6 w-14 h-14 bg-cyan-600 hover:bg-cyan-700 text-white
+           rounded-full shadow-lg flex items-center justify-center text-2xl transition-colors
+           active:scale-95">
+    +
+  </button>
+
+  <!-- 태스크 추가 모달 -->
+  <div id="add-modal" class="hidden fixed inset-0 bg-black/40 flex items-end justify-center z-50">
+    <div class="bg-white rounded-t-2xl shadow-xl w-full p-5 space-y-4">
+      <div class="w-10 h-1 bg-slate-200 rounded-full mx-auto"></div>
+      <h3 class="font-semibold text-slate-800 text-sm text-center">태스크 추가</h3>
+      <input id="new-task-title" type="text" placeholder="태스크 제목을 입력하세요"
+        class="w-full px-3 py-3 text-sm border border-slate-300 rounded-xl
+               focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent" />
+      <div class="flex gap-2 pb-2">
+        <button onclick="closeAddModal()"
+          class="flex-1 py-3 text-sm text-slate-600 border border-slate-300
+                 rounded-xl hover:bg-slate-50 transition-colors">
+          취소
+        </button>
+        <button onclick="addTask()"
+          class="flex-1 py-3 text-sm text-white bg-cyan-600 hover:bg-cyan-700
+                 rounded-xl transition-colors font-semibold">
+          추가
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentTab = 'todo';
+
+    function switchTab(tab) {
+      currentTab = tab;
+      ['todo', 'doing', 'done'].forEach(t => {
+        document.querySelector(`.col-${t}`).classList.toggle('hidden', t !== tab);
+        const btn = document.getElementById(`tab-${t}`);
+        if (t === tab) {
+          btn.classList.replace('text-slate-400', 'text-slate-700');
+          btn.classList.add('tab-active', 'border-slate-700');
+        } else {
+          btn.classList.replace('text-slate-700', 'text-slate-400');
+          btn.classList.remove('tab-active', 'border-slate-700');
+        }
+      });
+    }
+
+    function setFilter(f) {
+      ['all', 'me', 'unassigned'].forEach(id => {
+        const btn = document.getElementById(`filter-${id}`);
+        if (id === f) {
+          btn.className = 'px-3 py-1 text-xs font-medium rounded-full bg-slate-800 text-white transition-colors';
+        } else {
+          btn.className = 'px-3 py-1 text-xs font-medium rounded-full bg-slate-100 text-slate-500 transition-colors';
+        }
+      });
+    }
+
+    function openAddModal() {
+      document.getElementById('add-modal').classList.remove('hidden');
+      setTimeout(() => document.getElementById('new-task-title').focus(), 100);
+    }
+    function closeAddModal() {
+      document.getElementById('add-modal').classList.add('hidden');
+      document.getElementById('new-task-title').value = '';
+    }
+    function addTask() {
+      const title = document.getElementById('new-task-title').value.trim();
+      if (!title) return;
+      closeAddModal();
+    }
+  </script>
+</body>
+</html>
