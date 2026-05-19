@@ -11,6 +11,14 @@
 - **WHEN** 이미 존재하는 이메일로 가입 시도 시
 - **THEN** 409, { code: "EMAIL_EXISTS", message: "이미 사용 중인 이메일입니다" } 반환
 
+#### Scenario: 비밀번호 정책 위반
+- **WHEN** password가 아래 규칙을 하나라도 만족하지 않을 시
+  - 8자 이상
+  - 대문자(A-Z) 1자 이상
+  - 소문자(a-z) 1자 이상
+  - 특수문자(!@#$%^&* 등) 1자 이상
+- **THEN** 422, { code: "INVALID_PASSWORD", message: "비밀번호는 8자 이상, 대문자·소문자·특수문자를 포함해야 합니다" } 반환
+
 #### Scenario: 비밀번호 미입력
 - **WHEN** password 필드 없이 요청 시
 - **THEN** 422 반환
